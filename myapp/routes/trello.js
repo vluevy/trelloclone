@@ -27,16 +27,54 @@ router.get('/list', function(req, res, next) {
 			if(err) { console.log("err : " + err); }
 			
 			dataCount = result[0].cnt;
-	
+
+			sql = "select listnum, listname from list";
+
 			conn.query(sql, function(err, result){
 				if(err) { console.log("err : " + err); }
 
-				var rows = result ? result : {};
-				res.render("trello/list", {dataCount:dataCount});
+				var lists = result ? result : {};
+				sql = "select num, listnum, cardname from card";
+
+				conn.query(sql,function(err,result){
+					if(err) { console.log("err : " + err); }
+					var cards = result?result:{};
+					res.render("trello/list", {lists:lists,cards:cards,dataCount:dataCount});
+				});
+
 			});
-	
+			
 		});
 
+		conn.release();
+	});
+});
+
+
+router.post('/addlist', function(req,res,next){
+	var data = [req.body.listname];
+
+	pool.getConnection(function(err,conn){
+		var sql;
+		sql = "INSERT INTO list(listname) VALUES(?)";
+		conn.query(sql,data,function(err,result){
+			if(err){console.log("err : "+err);}
+			res.redirect("/trello/list");
+		});
+		conn.release();
+	});
+});
+
+router.post('/addcard', function(req,res,next){
+	var data = [req.body.listnum, req.body.cardname];
+
+	pool.getConnection(function(err,conn){
+		var sql;
+		sql = "INSERT INTO card(listnum, cardname) VALUES(?,?)";
+		conn.query(sql,data,function(err,result){
+			if(err){console.log("err : "+err);}
+			res.redirect("/trello/list");
+		});
 		conn.release();
 	});
 });
