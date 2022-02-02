@@ -37,14 +37,20 @@
             display: flex;
             justify-content: flex-start;
             width: 100%;
+            height: 90vh;
             overflow: auto;
             margin: 0 auto;
             padding: 30px 15px 15px;
         }
 
-        .list {
+        .list-card{
             width: 100%;
             max-width: 250px;
+            padding: 5px;
+        }
+
+        .list {
+            width: 100%;
             padding: 5px;
             background-color: #eee;
             border-radius: 5px;
@@ -98,29 +104,31 @@
     <div class="container">
         <div class="listgrid">
             <% for(var i=0; i< lists.length; i++) { %>
-            <div class="list" id="<%=lists[i].listnum%>">
-                <div class="listname">
-                    <%=lists[i].listname%>
-                </div>
-                <% for(var j=0; j< cards.length;j++) { %>
-                    <% if(lists[i].listnum==cards[j].listnum) { %>
-                            <div class="card" id="<%=cards[j].num%>">
-                                <%=cards[j].cardname %>
-                            </div>
+            <div class="list-card">
+                <div class="list" id="<%=lists[i].listnum%>">
+                    <div class="listname">
+                        <%=lists[i].listname%>
+                    </div>
+                    <% for(var j=0; j< cards.length;j++) { %>
+                        <% if(lists[i].listnum==cards[j].listnum) { %>
+                                <div class="card" id="<%=cards[j].num%>">
+                                    <%=cards[j].cardname %>
+                                </div>
+                            <% } %>
                         <% } %>
-                    <% } %>
-                <div class="addCard-div">
-                    <i class="fas fa-plus"></i> Add a card...
+                    <div class="addCard-div">
+                        <i class="fas fa-plus"></i> Add a card...
+                    </div>
                 </div>
             </div>
             <% } %>
 
-            <div class="list">
-                <div class="list-card addList-div">
+            <div class="list-card">
+                <div class="list addList-div">
                     <i class="fas fa-plus"></i> Add a list...
                 </div>
             </div>
-            <div class="list">
+            <div class="list-card">
                 <%- dataCount==0 ? "등록된 게시물이 없습니다." : dataCount+"개 리스트 존재" %>
             </div>
         </div>
