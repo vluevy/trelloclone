@@ -43,7 +43,7 @@
             padding: 30px 15px 15px;
         }
 
-        .list-card{
+        .list-card {
             width: 100%;
             max-width: 250px;
             padding: 5px;
@@ -57,14 +57,16 @@
             margin-right: 15px;
         }
 
-        .addList-div, .addCard-div {
+        .addList-div,
+        .addCard-div {
             font-size: 1rem;
             cursor: pointer;
             padding: 5px;
             border-radius: 3px;
         }
 
-        .addList-div:hover, .addCard-div:hover {
+        .addList-div:hover,
+        .addCard-div:hover {
             background-color: rgb(199, 199, 199);
         }
 
@@ -72,7 +74,8 @@
             margin-top: 10px;
         }
 
-        .list-input, .card-input {
+        .list-input,
+        .card-input {
             width: 100%;
             line-height: 15px;
             padding: 3px;
@@ -90,8 +93,22 @@
             padding: 3px;
             border-radius: 3px;
         }
-        .listname{margin-bottom: 10px;}
-        .card{background-color: white; border-radius: 3px; margin: 10px 0; padding: 5px;}
+
+        .listname {
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 3px;
+            margin: 10px 0;
+            padding: 5px;
+        }
+
+        .cards {
+            min-height: 5px;
+        }
     </style>
 
 </head>
@@ -104,33 +121,35 @@
     <div class="container">
         <div class="listgrid">
             <% for(var i=0; i< lists.length; i++) { %>
-            <div class="list-card">
-                <div class="list" id="<%=lists[i].listnum%>">
-                    <div class="listname">
-                        <%=lists[i].listname%>
-                    </div>
-                    <% for(var j=0; j< cards.length;j++) { %>
-                        <% if(lists[i].listnum==cards[j].listnum) { %>
-                                <div class="card" id="<%=cards[j].num%>">
-                                    <%=cards[j].cardname %>
-                                </div>
-                            <% } %>
-                        <% } %>
-                    <div class="addCard-div">
-                        <i class="fas fa-plus"></i> Add a card...
+                <div class="list-card">
+                    <div class="list" id="<%=lists[i].listnum%>">
+                        <div class="listname">
+                            <%=lists[i].listname%>
+                        </div>
+                        <div class="cards">
+                            <% for(var j=0; j< cards.length;j++) { %>
+                                <% if(lists[i].listnum==cards[j].listnum) { %>
+                                    <div class="card" id="<%=cards[j].num%>" draggable="true">
+                                        <%=cards[j].cardname %>
+                                    </div>
+                                    <% } %>
+                                        <% } %>
+                        </div>
+                        <div class="addCard-div">
+                            <i class="fas fa-plus"></i> Add a card...
+                        </div>
                     </div>
                 </div>
-            </div>
-            <% } %>
+                <% } %>
 
-            <div class="list-card">
-                <div class="list addList-div">
-                    <i class="fas fa-plus"></i> Add a list...
-                </div>
-            </div>
-            <div class="list-card">
-                <%- dataCount==0 ? "등록된 게시물이 없습니다." : dataCount+"개 리스트 존재" %>
-            </div>
+                    <div class="list-card">
+                        <div class="list addList-div">
+                            <i class="fas fa-plus"></i> Add a list...
+                        </div>
+                    </div>
+                    <div class="list-card">
+                        <%- dataCount==0 ? "등록된 리스트x" : dataCount+"개 리스트 존재" %>
+                    </div>
         </div>
     </div>
 
@@ -159,6 +178,19 @@
         }
     });
 
+    
+    function addList() {
+        var f = document.listform;
+        var str = f.listname.value;
+        if (!str) {
+            alert("리스트이름을 입력하세요");
+            f.listname.focus();
+            return;
+        }
+        f.action = "/trello/addlist";
+        f.submit();
+    };
+    
     document.addEventListener('click', function (e) {
         if (e.target && e.target.id == 'cancel-list-Btn') {
             const listBox2 = document.querySelector("div.active-addList");
@@ -175,21 +207,9 @@
         }
     });
 
-    function addList() {
-        var f = document.listform;
-        var str = f.listname.value;
-        if (!str) {
-            alert("리스트이름을 입력하세요");
-            f.listname.focus();
-            return;
-        }
-        f.action = "/trello/addlist";
-        f.submit();
-    };
-
-    document.addEventListener('click',function addcard() {
-        var t = event.target.closest("div");
-        if(t.classList == "addCard-div"){
+    document.addEventListener('click', function addcard(e) {
+        var t = e.target.closest("div");
+        if (t.classList == "addCard-div") {
             t.classList.remove("addCard-div");
             t.classList.add("active-addCard");
             t.innerHTML = `
@@ -197,7 +217,7 @@
                     <input class="card-input" name="cardname" type="text" placeholder="Add a card..." autofocus>
                         <span class="btn saveBtn" onclick="addCard();">Save</span>
                         <span class="btn" id="cancel-card-Btn">X</span>
-                        <input name="listnum" type="hidden" value="`+t.parentNode.id+`">
+                        <input name="listnum" type="hidden" value="`+ t.parentNode.id + `">
                 </form>
                 `;
         }
@@ -211,7 +231,7 @@
             cardBox2.innerHTML = `
                     <i class="fas fa-plus"></i> Add a card...
                 `;
-            }
+        }
     });
 
     function addCard() {
@@ -225,4 +245,54 @@
         f.action = "/trello/addcard";
         f.submit();
     };
+
+
+    const $ = (select) => document.querySelectorAll(select);
+    const draggables = $('.card');
+    const containers = $('.cards');
+
+    draggables.forEach(el => {
+        el.addEventListener('dragstart', () => {
+            el.classList.add('dragging');
+        });
+
+        el.addEventListener('dragend', e => {
+            const draggable = document.querySelector('.dragging')
+            console.log("리스트:"+e.target.parentNode.parentNode.id+"카드:"+draggable.id);
+            console.log(getElementIndex(draggable)+1);
+            const position=getElementIndex(draggable)+1;
+            el.classList.remove('dragging')
+            var url="/trello/update?listnum="+e.target.parentNode.parentNode.id+"&num="+draggable.id+"&position="+position;
+		    location.href=url;
+        });
+    });
+
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.card:not(.dragging)')]
+
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect() 
+            const offset = y - box.top - box.height / 2
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child }
+            } else {
+                return closest
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element
+    };
+
+
+    containers.forEach(container => {
+        container.addEventListener('dragover', e => {
+            e.preventDefault();
+            const afterElement = getDragAfterElement(container, e.clientY);
+            const draggable = document.querySelector('.dragging')
+            container.insertBefore(draggable, afterElement)
+            
+        })
+    });
+
+    function getElementIndex(element) {
+        return [].indexOf.call(element.parentNode.children, element);
+    }
 </script>

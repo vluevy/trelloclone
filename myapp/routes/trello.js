@@ -34,7 +34,7 @@ router.get('/list', function(req, res, next) {
 				if(err) { console.log("err : " + err); }
 
 				var lists = result ? result : {};
-				sql = "select num, listnum, cardname from card";
+				sql = "select num, listnum, cardname from card order by position";
 
 				conn.query(sql,function(err,result){
 					if(err) { console.log("err : " + err); }
@@ -66,14 +66,32 @@ router.post('/addlist', function(req,res,next){
 });
 
 router.post('/addcard', function(req,res,next){
-	var data = [req.body.listnum, req.body.cardname];
+	var data = [req.body.listnum, req.body.cardname, req.body.position];
 
 	pool.getConnection(function(err,conn){
 		var sql;
-		sql = "INSERT INTO card(listnum, cardname) VALUES(?,?)";
+		sql = "INSERT INTO card(listnum, cardname, position) VALUES(?,?,?)";
 		conn.query(sql,data,function(err,result){
 			if(err){console.log("err : "+err);}
 			res.redirect("/trello/list");
+		});
+		conn.release();
+	});
+});
+
+router.get('/update', function(req,res,next){
+	var data = [req.query.listnum, req.query.position];
+
+	pool.getConnection(function(err,conn){
+		var sql = "UPDATE card SET position=position+1 WHERE listnum=? AND position >= ?";
+		data=[req.query.listnum, req.query.position, req.query.num];
+		conn.query(sql,data,function(err,result){
+			sql = "UPDATE card SET listnum=?, position=? WHERE num=?";
+
+			conn.query(sql,data,function(err,result){
+				if(err){console.log("err : "+err);}
+				res.redirect("/trello/list");
+			});
 		});
 		conn.release();
 	});
